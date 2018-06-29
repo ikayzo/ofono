@@ -1023,12 +1023,12 @@ static void pri_read_settings_callback(const struct ofono_error *error,
 }
 
 static DBusMessage *pri_set_apn(struct pri_context *ctx, DBusConnection *conn,
-				DBusMessage *msg, const char *apn)
+				DBusMessage *msg, const char *apn, gboolean multi)
 {
 	GKeyFile *settings = ctx->gprs->settings;
 
 	if (g_str_equal(apn, ctx->context.apn))
-		return dbus_message_new_method_return(msg);
+		return multi ? NULL : dbus_message_new_method_return(msg);
 
 	if (is_valid_apn(apn) == FALSE)
 		return __ofono_error_invalid_format(msg);
@@ -1041,7 +1041,7 @@ static DBusMessage *pri_set_apn(struct pri_context *ctx, DBusConnection *conn,
 		storage_sync(ctx->gprs->imsi, SETTINGS_STORE, settings);
 	}
 
-	if (msg)
+	if (msg && !multi)
 		g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
 
 	ofono_dbus_signal_property_changed(conn, ctx->path,
@@ -1054,7 +1054,7 @@ static DBusMessage *pri_set_apn(struct pri_context *ctx, DBusConnection *conn,
 
 static DBusMessage *pri_set_username(struct pri_context *ctx,
 					DBusConnection *conn, DBusMessage *msg,
-					const char *username)
+					const char *username, gboolean multi)
 {
 	GKeyFile *settings = ctx->gprs->settings;
 
@@ -1062,7 +1062,7 @@ static DBusMessage *pri_set_username(struct pri_context *ctx,
 		return __ofono_error_invalid_format(msg);
 
 	if (g_str_equal(username, ctx->context.username))
-		return dbus_message_new_method_return(msg);
+		return multi ? NULL : dbus_message_new_method_return(msg);
 
 	strcpy(ctx->context.username, username);
 
@@ -1072,7 +1072,8 @@ static DBusMessage *pri_set_username(struct pri_context *ctx,
 		storage_sync(ctx->gprs->imsi, SETTINGS_STORE, settings);
 	}
 
-	g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
+	if (!multi)
+		g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
 
 	ofono_dbus_signal_property_changed(conn, ctx->path,
 					OFONO_CONNECTION_CONTEXT_INTERFACE,
@@ -1084,7 +1085,7 @@ static DBusMessage *pri_set_username(struct pri_context *ctx,
 
 static DBusMessage *pri_set_password(struct pri_context *ctx,
 					DBusConnection *conn, DBusMessage *msg,
-					const char *password)
+					const char *password, gboolean multi)
 {
 	GKeyFile *settings = ctx->gprs->settings;
 
@@ -1092,7 +1093,7 @@ static DBusMessage *pri_set_password(struct pri_context *ctx,
 		return __ofono_error_invalid_format(msg);
 
 	if (g_str_equal(password, ctx->context.password))
-		return dbus_message_new_method_return(msg);
+		return multi ? NULL : dbus_message_new_method_return(msg);
 
 	strcpy(ctx->context.password, password);
 
@@ -1102,7 +1103,8 @@ static DBusMessage *pri_set_password(struct pri_context *ctx,
 		storage_sync(ctx->gprs->imsi, SETTINGS_STORE, settings);
 	}
 
-	g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
+	if (!multi)
+		g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
 
 	ofono_dbus_signal_property_changed(conn, ctx->path,
 					OFONO_CONNECTION_CONTEXT_INTERFACE,
@@ -1113,7 +1115,7 @@ static DBusMessage *pri_set_password(struct pri_context *ctx,
 }
 
 static DBusMessage *pri_set_type(struct pri_context *ctx, DBusConnection *conn,
-					DBusMessage *msg, const char *type)
+					DBusMessage *msg, const char *type, gboolean multi)
 {
 	GKeyFile *settings = ctx->gprs->settings;
 	enum ofono_gprs_context_type context_type;
@@ -1122,7 +1124,7 @@ static DBusMessage *pri_set_type(struct pri_context *ctx, DBusConnection *conn,
 		return __ofono_error_invalid_format(msg);
 
 	if (ctx->type == context_type)
-		return dbus_message_new_method_return(msg);
+		return multi ? NULL : dbus_message_new_method_return(msg);
 
 	ctx->type = context_type;
 
@@ -1131,7 +1133,8 @@ static DBusMessage *pri_set_type(struct pri_context *ctx, DBusConnection *conn,
 		storage_sync(ctx->gprs->imsi, SETTINGS_STORE, settings);
 	}
 
-	g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
+	if (!multi)
+		g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
 
 	ofono_dbus_signal_property_changed(conn, ctx->path,
 					OFONO_CONNECTION_CONTEXT_INTERFACE,
@@ -1142,7 +1145,7 @@ static DBusMessage *pri_set_type(struct pri_context *ctx, DBusConnection *conn,
 
 static DBusMessage *pri_set_proto(struct pri_context *ctx,
 					DBusConnection *conn,
-					DBusMessage *msg, const char *str)
+					DBusMessage *msg, const char *str, gboolean multi)
 {
 	GKeyFile *settings = ctx->gprs->settings;
 	enum ofono_gprs_proto proto;
@@ -1151,7 +1154,7 @@ static DBusMessage *pri_set_proto(struct pri_context *ctx,
 		return __ofono_error_invalid_format(msg);
 
 	if (ctx->context.proto == proto)
-		return dbus_message_new_method_return(msg);
+		return multi ? NULL : dbus_message_new_method_return(msg);
 
 	ctx->context.proto = proto;
 
@@ -1160,7 +1163,8 @@ static DBusMessage *pri_set_proto(struct pri_context *ctx,
 		storage_sync(ctx->gprs->imsi, SETTINGS_STORE, settings);
 	}
 
-	g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
+	if (!multi)
+		g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
 
 	ofono_dbus_signal_property_changed(conn, ctx->path,
 					OFONO_CONNECTION_CONTEXT_INTERFACE,
@@ -1170,7 +1174,7 @@ static DBusMessage *pri_set_proto(struct pri_context *ctx,
 }
 
 static DBusMessage *pri_set_name(struct pri_context *ctx, DBusConnection *conn,
-					DBusMessage *msg, const char *name)
+					DBusMessage *msg, const char *name, gboolean multi)
 {
 	GKeyFile *settings = ctx->gprs->settings;
 
@@ -1178,7 +1182,7 @@ static DBusMessage *pri_set_name(struct pri_context *ctx, DBusConnection *conn,
 		return __ofono_error_invalid_format(msg);
 
 	if (ctx->name && g_str_equal(ctx->name, name))
-		return dbus_message_new_method_return(msg);
+		return multi ? NULL : dbus_message_new_method_return(msg);
 
 	strcpy(ctx->name, name);
 
@@ -1187,7 +1191,8 @@ static DBusMessage *pri_set_name(struct pri_context *ctx, DBusConnection *conn,
 		storage_sync(ctx->gprs->imsi, SETTINGS_STORE, settings);
 	}
 
-	g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
+	if (!multi)
+		g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
 
 	ofono_dbus_signal_property_changed(conn, ctx->path,
 					OFONO_CONNECTION_CONTEXT_INTERFACE,
@@ -1256,7 +1261,7 @@ static DBusMessage *pri_set_message_center(struct pri_context *ctx,
 
 static DBusMessage *pri_set_auth_method(struct pri_context *ctx,
 					DBusConnection *conn,
-					DBusMessage *msg, const char *str)
+					DBusMessage *msg, const char *str, gboolean multi)
 {
 	GKeyFile *settings = ctx->gprs->settings;
 	enum ofono_gprs_auth_method auth;
@@ -1265,7 +1270,7 @@ static DBusMessage *pri_set_auth_method(struct pri_context *ctx,
 		return __ofono_error_invalid_format(msg);
 
 	if (ctx->context.auth_method == auth)
-		return dbus_message_new_method_return(msg);
+		return multi ? NULL : dbus_message_new_method_return(msg);
 
 	ctx->context.auth_method = auth;
 
@@ -1275,7 +1280,8 @@ static DBusMessage *pri_set_auth_method(struct pri_context *ctx,
 		storage_sync(ctx->gprs->imsi, SETTINGS_STORE, settings);
 	}
 
-	g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
+	if (!multi)
+		g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
 
 	ofono_dbus_signal_property_changed(conn, ctx->path,
 					OFONO_CONNECTION_CONTEXT_INTERFACE,
@@ -1285,29 +1291,25 @@ static DBusMessage *pri_set_auth_method(struct pri_context *ctx,
 	return NULL;
 }
 
-static DBusMessage *pri_set_property(DBusConnection *conn,
-					DBusMessage *msg, void *data)
+static DBusMessage *do_pri_set_property(DBusConnection *conn, DBusMessageIter *iter,
+					DBusMessage *msg, void *data, gboolean multi)
 {
 	struct pri_context *ctx = data;
-	DBusMessageIter iter;
 	DBusMessageIter var;
 	const char *property;
 	dbus_bool_t value;
 	const char *str;
 
-	if (!dbus_message_iter_init(msg, &iter))
+	if (dbus_message_iter_get_arg_type(iter) != DBUS_TYPE_STRING)
 		return __ofono_error_invalid_args(msg);
 
-	if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_STRING)
+	dbus_message_iter_get_basic(iter, &property);
+	dbus_message_iter_next(iter);
+
+	if (dbus_message_iter_get_arg_type(iter) != DBUS_TYPE_VARIANT)
 		return __ofono_error_invalid_args(msg);
 
-	dbus_message_iter_get_basic(&iter, &property);
-	dbus_message_iter_next(&iter);
-
-	if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_VARIANT)
-		return __ofono_error_invalid_args(msg);
-
-	dbus_message_iter_recurse(&iter, &var);
+	dbus_message_iter_recurse(iter, &var);
 
 	if (g_str_equal(property, "Active")) {
 		struct ofono_gprs_context *gc;
@@ -1350,7 +1352,7 @@ static DBusMessage *pri_set_property(DBusConnection *conn,
 	}
 
 	/* All other properties are read-only when context is active */
-	if (ctx->active == TRUE)
+	if ((ctx->active == TRUE) && !multi)
 		return __ofono_error_in_use(msg);
 
 	if (!strcmp(property, "AccessPointName")) {
@@ -1359,49 +1361,49 @@ static DBusMessage *pri_set_property(DBusConnection *conn,
 
 		dbus_message_iter_get_basic(&var, &str);
 
-		return pri_set_apn(ctx, conn, msg, str);
+		return pri_set_apn(ctx, conn, msg, str, multi);
 	} else if (!strcmp(property, "Type")) {
 		if (dbus_message_iter_get_arg_type(&var) != DBUS_TYPE_STRING)
 			return __ofono_error_invalid_args(msg);
 
 		dbus_message_iter_get_basic(&var, &str);
 
-		return pri_set_type(ctx, conn, msg, str);
+		return pri_set_type(ctx, conn, msg, str, multi);
 	} else if (!strcmp(property, "Protocol")) {
 		if (dbus_message_iter_get_arg_type(&var) != DBUS_TYPE_STRING)
 			return __ofono_error_invalid_args(msg);
 
 		dbus_message_iter_get_basic(&var, &str);
 
-		return pri_set_proto(ctx, conn, msg, str);
+		return pri_set_proto(ctx, conn, msg, str, multi);
 	} else if (!strcmp(property, "Username")) {
 		if (dbus_message_iter_get_arg_type(&var) != DBUS_TYPE_STRING)
 			return __ofono_error_invalid_args(msg);
 
 		dbus_message_iter_get_basic(&var, &str);
 
-		return pri_set_username(ctx, conn, msg, str);
+		return pri_set_username(ctx, conn, msg, str, multi);
 	} else if (!strcmp(property, "Password")) {
 		if (dbus_message_iter_get_arg_type(&var) != DBUS_TYPE_STRING)
 			return __ofono_error_invalid_args(msg);
 
 		dbus_message_iter_get_basic(&var, &str);
 
-		return pri_set_password(ctx, conn, msg, str);
+		return pri_set_password(ctx, conn, msg, str, multi);
 	} else if (!strcmp(property, "Name")) {
 		if (dbus_message_iter_get_arg_type(&var) != DBUS_TYPE_STRING)
 			return __ofono_error_invalid_args(msg);
 
 		dbus_message_iter_get_basic(&var, &str);
 
-		return pri_set_name(ctx, conn, msg, str);
+		return pri_set_name(ctx, conn, msg, str, multi);
 	} else if (!strcmp(property, "AuthenticationMethod")) {
 		if (dbus_message_iter_get_arg_type(&var) != DBUS_TYPE_STRING)
 			return __ofono_error_invalid_args(msg);
 
 		dbus_message_iter_get_basic(&var, &str);
 
-		return pri_set_auth_method(ctx, conn, msg, str);
+		return pri_set_auth_method(ctx, conn, msg, str, multi);
 	}
 
 	if (ctx->type != OFONO_GPRS_CONTEXT_TYPE_MMS)
@@ -1426,6 +1428,65 @@ static DBusMessage *pri_set_property(DBusConnection *conn,
 	return __ofono_error_invalid_args(msg);
 }
 
+static DBusMessage *pri_set_property(DBusConnection *conn,
+	DBusMessage *msg, void *data)
+{
+	DBusMessageIter iter;
+	if (!dbus_message_iter_init(msg, &iter))
+		return __ofono_error_invalid_args(msg);
+
+	return do_pri_set_property(conn, &iter, msg, data, FALSE);
+}
+
+static DBusMessage *pri_set_properties(DBusConnection *conn,
+					DBusMessage *msg, void *data)
+{
+	DBusMessageIter iter;
+	DBusMessageIter array;
+	DBusMessage * result = NULL;
+
+	if (!dbus_message_iter_init(msg, &iter))
+		return __ofono_error_invalid_args(msg);
+
+	if (dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_ARRAY)
+		return __ofono_error_invalid_args(msg);
+
+	dbus_message_iter_recurse(&iter, &array);
+	while (dbus_message_iter_get_arg_type(&array) != DBUS_TYPE_INVALID) {
+		DBusMessageIter entry;
+
+		dbus_message_iter_recurse(&array, &entry);
+		result = do_pri_set_property(conn, &entry, msg, data, TRUE);
+
+		if (result != NULL)
+		{
+			if (DBUS_MESSAGE_TYPE_ERROR == dbus_message_get_type(result)) 
+				break;
+
+			dbus_message_unref(result);
+			result = NULL;
+		}
+		dbus_message_iter_next(&array);
+	}
+	if (result != NULL)
+		g_dbus_send_message(conn, result);
+	else 
+	{
+		// The settings were set successfully, deactivate and reset
+		struct pri_context *ctx = data;
+		if (ctx->active) {
+			struct ofono_gprs_context *gc = ctx->context_driver;
+			ctx->pending = dbus_message_ref(msg);
+			gc->driver->deactivate_primary(gc, ctx->context.cid,
+						pri_deactivate_callback, ctx);
+		}
+		else
+			g_dbus_send_reply(conn, msg, DBUS_TYPE_INVALID);
+	}
+
+	return NULL;
+}
+
 static const GDBusMethodTable context_methods[] = {
 	{ GDBUS_METHOD("GetProperties",
 			NULL, GDBUS_ARGS({ "properties", "a{sv}" }),
@@ -1433,6 +1494,9 @@ static const GDBusMethodTable context_methods[] = {
 	{ GDBUS_ASYNC_METHOD("SetProperty",
 			GDBUS_ARGS({ "property", "s" }, { "value", "v" }),
 			NULL, pri_set_property) },
+	{ GDBUS_ASYNC_METHOD("SetProperties",
+			GDBUS_ARGS({ "properties", "a{sv}" }),
+			NULL, pri_set_properties) },
 	{ }
 };
 

@@ -1881,8 +1881,9 @@ struct ofono_modem *ofono_modem_create(const char *name, const char *type)
 
 	g_modem_list = g_slist_prepend(g_modem_list, modem);
 
-	if (name == NULL)
-		next_modem_id += 1;
+//	SCV: We need to keep the modem name constant, and there is only one
+//	if (name == NULL)
+//		next_modem_id += 1;
 
 	return modem;
 }

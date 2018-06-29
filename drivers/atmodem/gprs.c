@@ -50,7 +50,7 @@ struct gprs_data {
 	GAtChat *chat;
 	unsigned int vendor;
 	unsigned int last_auto_context_id;
-	gboolean telit_try_reattach;
+//	gboolean telit_try_reattach;
 	int attached;
 };
 
@@ -208,17 +208,18 @@ static void cgreg_notify(GAtResult *result, gpointer user_data)
 	 * This does not re-activate the context, but if a network connection
 	 * is still correct, will generate an immediate +CGREG: 1.
 	 */
-	if (gd->vendor == OFONO_VENDOR_TELIT) {
-		if (gd->attached && !status && !gd->telit_try_reattach) {
-			DBG("Trying to re-attach gprs network");
-			gd->telit_try_reattach = TRUE;
-			g_at_chat_send(gd->chat, "AT+CGATT=1", none_prefix,
-					NULL, NULL, NULL);
-			return;
-		}
-
-		gd->telit_try_reattach = FALSE;
-	}
+	// SCV: This is actually broken and we handle the case in gwappd
+//	if (gd->vendor == OFONO_VENDOR_TELIT) {
+//		if (gd->attached && !status && !gd->telit_try_reattach) {
+//			DBG("Trying to re-attach gprs network");
+//			gd->telit_try_reattach = TRUE;
+//			g_at_chat_send(gd->chat, "AT+CGATT=1", none_prefix,
+//					NULL, NULL, NULL);
+//			return;
+//		}
+//
+//		gd->telit_try_reattach = FALSE;
+//	}
 
 	ofono_gprs_status_notify(gprs, status);
 }
@@ -240,9 +241,9 @@ static void cgev_notify(GAtResult *result, gpointer user_data)
 
 	if (g_str_equal(event, "NW DETACH") ||
 			g_str_equal(event, "ME DETACH")) {
-		if (gd->vendor == OFONO_VENDOR_TELIT &&
-				gd->telit_try_reattach)
-			return;
+//		if (gd->vendor == OFONO_VENDOR_TELIT &&
+//				gd->telit_try_reattach)
+//			return;
 
 		gd->attached = FALSE;
 		ofono_gprs_detached_notify(gprs);

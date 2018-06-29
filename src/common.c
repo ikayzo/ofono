@@ -706,7 +706,7 @@ gboolean is_valid_apn(const char *apn)
 	if (apn == NULL)
 		return FALSE;
 
-	if (apn[0] == '.' || apn[0] == '\0')
+	if (apn[0] == '.')
 		return FALSE;
 
 	if (strlen(apn) > OFONO_GPRS_MAX_APN_LENGTH)
@@ -716,7 +716,7 @@ gboolean is_valid_apn(const char *apn)
 		if (g_ascii_isalnum(apn[i]))
 			continue;
 
-		if (apn[i] == '-')
+		if (apn[i] == '-' || apn[i] == ' ')
 			continue;
 
 		if (apn[i] == '.' && (i - last_period) > 1) {

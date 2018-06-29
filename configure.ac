@@ -233,9 +233,9 @@ if (test "${prefix}" = "NONE"); then
 fi
 
 if (test "$localstatedir" = '${prefix}/var'); then
-	storagedir="${prefix}/var/lib/ofono"
+	storagedir="${prefix}/var/persist/ofono"
 else
-	storagedir="${localstatedir}/lib/ofono"
+	storagedir="${localstatedir}/persist/ofono"
 fi
 AC_DEFINE_UNQUOTED(STORAGEDIR, "${storagedir}",
 			[Directory for the storage files])
